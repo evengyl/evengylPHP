@@ -3,16 +3,25 @@
 #	Createur : Evengyl
 #	Date de creation : 29-09-2014
 #	Version : 1.2
-#	Date de modif : 20-09-2016
+#	Date de modif : 12-11-2018
 ##########################################
 
 class all_query extends _db_connect
 {
 	public $db_link;
 	protected $_prefix_table;
+	public $_app;
 
-	public function __construct()
+	public function __construct(&$_app)
 	{
+		//part for assign toute les req sql pour listing
+		$this->_app = $_app;
+
+		if(empty(parent::$base))
+			parent::$base = $this->_app->base_dir;
+
+		parent::__construct();
+
 		if(Config::$prefix_sql != '')
 			$this->_prefix_table = Config::$prefix_sql;
 	}
@@ -27,7 +36,7 @@ class all_query extends _db_connect
 
 		$i = 0;
 
-		while($row = parent::fetch_object($construct_requete_sql))
+		while($row = parent::fetch_object($construct_requete_sql, $this->_app))
 		{
 			$res_fx[$i] = $row;
 			$i++;
@@ -43,7 +52,7 @@ class all_query extends _db_connect
 		else 
 		{
 			if($is_var_translate)//il n'ira enlever les _fr _nl _en que si i ly a des var trnaslate
-				return $parse_sql->parse_var_translate($res_fx); //va enlever les _fr _en _nl des var recu pour plus de facilité dans les templates
+				return $parse_sql->parse_var_translate($res_fx, $return_sql_prepare); //va enlever les _fr _en _nl des var recu pour plus de facilité dans les templates
 			else
 				return $res_fx;
 		}
@@ -75,7 +84,7 @@ class all_query extends _db_connect
 
 		$values = substr($values,2);
 		$req_sql = "INSERT INTO ".$req_sql->table." (".$columns.") VALUES (".$values.")";
-		parent::query($req_sql);
+		parent::query($req_sql, $this->_app);
 		unset($req_sql);
 
 	}
@@ -110,7 +119,7 @@ class all_query extends _db_connect
 				$req_sql = 'UPDATE '.$req_sql->table.' SET '.$set_all.' WHERE '.$req_sql->where;	
 		}
 
-		$requete_win_lost = parent::query_update($req_sql);
+		$requete_win_lost = parent::query_update($req_sql, $this->_app);
 		if($requete_win_lost > 0)
 			return $erreur = 'modification bien appliquée';
 		else
@@ -129,7 +138,7 @@ class all_query extends _db_connect
 		
 
 		$req_sql = "DELETE FROM ".$table." WHERE ".$where;
-		parent::query($req_sql);
+		parent::query($req_sql, $this->_app);
 	}
 
 	public function delete($obj)
@@ -144,7 +153,7 @@ class all_query extends _db_connect
 			if(isset($obj->where) && $obj->where != "")
 			{
 				$construct_req = "DELETE FROM ".$obj->table ." WHERE ". $obj->where ."";	
-				parent::query($construct_req);
+				parent::query($construct_req, $this->_app);
 			}
 			else
 				return 0;
@@ -161,7 +170,7 @@ class all_query extends _db_connect
 		if(isset($req_sql))
 		{
 			$i = 0;
-			while($row = parent::fetch_object($req_sql))
+			while($row = parent::fetch_object($req_sql, $this->_app))
 			{
 				$res_fx[$i] = $row;
 				$i++;
@@ -195,7 +204,7 @@ class all_query extends _db_connect
 
     public function query_simple($query)
     {
-        parent::query($query);
+        parent::query($query, $this->_app);
     }
 
 

@@ -61,7 +61,7 @@ class select extends all_query
 
 			//partie gestion des var et var translate
 			$var_processing = new var_processing();
-			$this->construct_requete_sql .= $var_processing->var_processing($req_sql->var, isset($req_sql->var_translate)?$req_sql->var_translate:"", $this->table, $this->on);
+			$this->construct_requete_sql .= $var_processing->var_processing(isset($req_sql->var)?$req_sql->var:"", isset($req_sql->var_translate)?$req_sql->var_translate:"", $this->table, $this->on);
 
 
 

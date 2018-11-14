@@ -1,13 +1,11 @@
 <?
 class parse_sql
 {
-	public function __construct()
+	public function parse_var_translate($res_sql, $return_sql_prepare)
 	{
+		if($return_sql_prepare == 1)
+			array_pop($res_sql);
 
-	}
-
-	public function parse_var_translate($res_sql)
-	{
 		foreach($res_sql as $key_res => $row_obj_sql)
 		{
 			foreach($row_obj_sql as $key => $vallue)

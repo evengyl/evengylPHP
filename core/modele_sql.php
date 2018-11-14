@@ -1,23 +1,23 @@
 <?php 
 
-Class modele_sql
+Class modele_sql   
 {
-	private $orm;
-	private $db_link;
-	public function __construct(&$orm, &$db_link)
+	public $modele_used;
+
+	//part select_orm
+	public $var;
+	public $where;
+	public $order_by;
+
+	public function __construct($class)
 	{
-		$this->orm = &$orm;
-		$this->db_link = &$db_link;
+		$this->modele_used = $class;
 	}
 
-	public function select()
+	public function select($req_sql)
 	{
-		affiche_pre($this->orm);
-	}
+		//attention que le var processing et where proeceessing doit aussi etre utilisé par write donc il faut standardiser les deux 
+		$select = new select_orm($req_sql, new $this->modele_used);
 
-	public function write($req_sql)
-	{
-		affiche_pre($req_sql);
 	}
-
 }

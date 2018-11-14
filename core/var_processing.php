@@ -34,15 +34,17 @@ class var_processing
 			}
 		}
 
-
 		$tmp_array_var = "";
 		if(isset($var) && $var != "")
 			$tmp_array_var = array_map('trim', explode(",", $var));
 			
 		if(!empty($tmp_array_var))
 			$array_all_var_listing = array_merge($array_var_translate, $tmp_array_var);
-		else
+
+		else if(!empty($array_var_translate))
 			$array_all_var_listing = $array_var_translate;
+		else
+			$array_all_var_listing[0] = '*';
 		
 		//processing pour le join debut
 		foreach($array_all_var_listing as $row_tested)
