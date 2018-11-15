@@ -12,6 +12,46 @@ class select extends all_query
 	public $order = "";
 	public $is_var_translate = false;
 
+	/*
+	IDEALISATION D'UNE REQUETE COMPLEXE
+	AVEC LES 3 TABLE DE TEST
+
+	$sql = new stdClass();
+	$sql->table = ["test_pays", "test_famille", "test_enfant"];
+	$sql->var = [
+					"test_pays" => ["id", "pays"], 
+					"test_famille" => ["id", "id_pays", "name", "coord", "mail"], 
+					"test_enfant" => ["id", id_famille", "enfant_name_1", "enfant_name_2", "enfant_name_2"]];
+	$sql->where = "pays = belgique";
+
+	-le where pays et lié a la premiere table entrée a savoir
+	-pour le nombre de left join et on, il suffit de compter le nombre de table dans table et faire -1, on aura deux left join ici 
+
+	en sql elle marcherai si 
+
+	SELECT 
+		test_pays.pays, 
+		test_famille.id_pays, test_famille.name, test_famille.coord, test_famille.mail, 
+		test_enfant.id_famille, test_enfant.enfant_name_1, test_enfant.enfant_name_2, test_enfant.enfant_name_3
+
+	FROM 
+		test_pays
+	LEFT JOIN
+		test_famille
+	ON 
+		test_pays.id = test_famille.id_pays
+
+	LEFT JOIN
+		test_enfant
+	ON
+		test_famille.id = test_enfant.id_famille 
+
+	WHERE
+		test_pays.pays = 'belgique'
+
+
+	*/
+
 	public function __construct($req_sql)
 	{
 		if(is_object($req_sql))
@@ -23,6 +63,7 @@ class select extends all_query
 				$this->table = $this->_prefix_table.$req_sql->table;	
 			else
 				$_SESSION["error"] = "Aucune table n'a été sélectionnée pour la requète voir la requète suivante : ".$this->construct_requete_sql;
+
 
 			//part FORM et JOIN
 			if(isset($req_sql->join) && !empty($req_sql->join))

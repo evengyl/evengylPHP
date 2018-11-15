@@ -10,6 +10,7 @@ class where
 		$symbol = "";
 		$where_first_element = "";
 		$where_second_element = "";
+		$comparateur = "";
 
 		$string_where = "WHERE ";
 		if(empty($where))
@@ -34,9 +35,14 @@ class where
 							$where_second_element = "(".implode($row_where, ',').")";
 
 							if(end($where) == "NOT IN")
-								$symbol = " ".end($where)." ";
-							else
+								$symbol = " NOT IN ";
+							else if(end($where) == "IN")
 								$symbol = " IN ";
+							else if(end($where) == "OR")
+								$symbol = " OR ";
+							else if(end($where) == "AND")
+								$symbol = " AND ";
+								
 						}
 						else
 						{
@@ -71,4 +77,26 @@ class where
 		}
 		return $string_where.$where_first_element.$symbol.$where_second_element;
 	}
+
+	public function where_processing_2($where)
+	{
+
+	}
 }
+
+
+//GENERATION 2
+
+/* type de requete gérée
+
+
+("id = 1", $id_retour = 1);
+(["id" => "2"], $id_retour = 2);
+(["id" => "3", "!="], $id_retour = 1); //ici comme on demande un different de, je prends le premier des id, plus simple pour les test
+(["id" => array(1,2,3,4,5)], $id_retour = 1);
+(["id" => array(1,2,3), "NOT IN"], $id_retour = 4);
+
+
+
+SELECT test_1, name_fr, name_code FROM unit_test left join translate on unit_test.id = translate.id  WHERE unit_test.id = 1
+*/
