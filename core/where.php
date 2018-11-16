@@ -78,25 +78,53 @@ class where
 		return $string_where.$where_first_element.$symbol.$where_second_element;
 	}
 
-	public function where_processing_2($where)
+	public function where_processing_2($table = array(), $where = array())
 	{
+		$where_chain = " WHERE ";
+		$like = false;
 
+		if(empty($where[0]) || $where[0] == '1')
+			$where_chain .= " 1 ";
+		else
+		{
+			if(is_array($where))
+			{
+				foreach($where as $key => $row_where)
+				{
+					if($row_where == "OR" || $row_where == "AND")
+						$where_chain .= htmlentities($row_where)." ";
+
+					else if($row_where == "LIKE")
+					{
+						$where_chain .= " LIKE ";
+						$like = true;
+					}
+					else if($row_where == "NOT LIKE")
+					{
+						$where_chain .= " NOT LIKE ";
+						$like = true;
+					}
+
+					else if($row_where == "IN")
+						$where_chain .= htmlentities($row_where)." ";
+
+					else if($row_where == "NOT IN")
+						$where_chain .= htmlentities($row_where)." ";
+
+					else
+					{
+						if($like)
+							$row_where = "'%".htmlentities($row_where)."%' ";
+						else
+							$row_where = $table[0].".".htmlentities($row_where)." ";
+						
+						$where_chain .= $row_where;
+					}
+				}
+			}
+			else
+				$where_chain .= $table[0].".".htmlentities($where);	
+		}
+		return $where_chain;
 	}
 }
-
-
-//GENERATION 2
-
-/* type de requete gérée
-
-
-("id = 1", $id_retour = 1);
-(["id" => "2"], $id_retour = 2);
-(["id" => "3", "!="], $id_retour = 1); //ici comme on demande un different de, je prends le premier des id, plus simple pour les test
-(["id" => array(1,2,3,4,5)], $id_retour = 1);
-(["id" => array(1,2,3), "NOT IN"], $id_retour = 4);
-
-
-
-SELECT test_1, name_fr, name_code FROM unit_test left join translate on unit_test.id = translate.id  WHERE unit_test.id = 1
-*/
