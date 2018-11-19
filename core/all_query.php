@@ -29,10 +29,8 @@ class all_query extends _db_connect
 
 	public function select($req_sql, $return_sql_prepare = 0)
 	{
-		$parse_sql = new parse_sql();
 		$select =  new select($req_sql);
-		$construct_requete_sql = $select->get_construct_requete_sql();
-		$is_var_translate = $select->get_if_var_translate();
+		$construct_requete_sql = $select->construct_requete_sql;
 
 		$i = 0;
 
@@ -50,12 +48,7 @@ class all_query extends _db_connect
 		if(!isset($res_fx))
 			return '';
 		else 
-		{
-			if($is_var_translate)//il n'ira enlever les _fr _nl _en que si i ly a des var trnaslate
-				return $parse_sql->parse_var_translate($res_fx, $return_sql_prepare); //va enlever les _fr _en _nl des var recu pour plus de facilité dans les templates
-			else
-				return $res_fx;
-		}
+			return $res_fx;
 			
 	}
 
