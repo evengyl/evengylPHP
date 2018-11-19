@@ -51,7 +51,6 @@ class _db_connect extends Config
 			$i = count($this->_app->array_sql_);
 			$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
 			$this->_app->array_sql_[$i]['sql'] = $req_sql;
-
 			$this->last_req_sql = $req_sql; // enregistre une copie temporaire de la requete
 			$this->last_res_sql = mysqli_query($this->db_link, $req_sql)or die('Probleme de requete = '. $req_sql);// enregistre une copie temporaire de la reponse requete
 			if(!$this->last_res_sql && $_SERVER['HTTP_HOST'] == "localhost")
