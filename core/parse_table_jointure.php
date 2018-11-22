@@ -16,7 +16,7 @@ Class parse_table_jointure
 			$from_jointure .= $table[$i]." ON ";
 
 
-			$from_jointure .= $table[$j].".".$var[$table[$j]][0]." = ".$table[$i].".".$var[$table[$i]][0];
+			$from_jointure .= $table[0].".id_".$table[$i]." = ".$table[$i].".".$var[$table[$i]][0];
 
 			$count_jointure--;			
 			$i++;
