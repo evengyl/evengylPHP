@@ -11,7 +11,7 @@ class var_processing
 
 		foreach($table as $row_table)
 		{
-			if(isset($var[$row_table]) && is_array($var[1]))
+			if(isset($var[$row_table]) && $this->is_assoc($var))
 			{
 				foreach($var[$row_table] as $row_var_table)
 					$chain_var .= $row_table.".".$row_var_table.", ";	
@@ -62,5 +62,10 @@ class var_processing
 		}
 
 		return $chain_var_tr_tmp;
+	}
+
+	public function is_assoc($arr)
+	{
+	    return array_keys($arr) !== range(0, count($arr) - 1);
 	}
 }
