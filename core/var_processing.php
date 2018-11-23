@@ -4,29 +4,39 @@ class var_processing
 	public $table = "";
 	public $table_join_on = "";
 
-	public function set_var_chain($table, $var)
+	public function set_var_chain($table, $var = false)
 	{
 		$chain_var = "";
 		$multi_table_var = false;
 
+		if(!$var)
+			$chain_var .= "*";
+
 		foreach($table as $row_table)
 		{
-			if(isset($var[$row_table]) && $this->is_assoc($var))
+			if(is_array($var))
 			{
-				foreach($var[$row_table] as $row_var_table)
-					$chain_var .= $row_table.".".$row_var_table.", ";	
+				if(isset($var[$row_table]) && $this->is_assoc($var))
+				{
+					foreach($var[$row_table] as $row_var_table)
+						$chain_var .= $row_table.".".$row_var_table.", ";	
 
-				$multi_table_var = true;
+					$multi_table_var = true;
+				}
+				else if($var[0] == "*")
+					$chain_var .= "*";
+				else
+				{
+					foreach($var as $row_var)
+						$chain_var .= $table[0].".".$row_var.", ";
+					
+					$multi_table_var = true;
+				}
 			}
-			else if($var[0] == "*")
-				$chain_var .= "*";
-			else
-			{
-				foreach($var as $row_var)
-					$chain_var .= $table[0].".".$row_var.", ";
-				
-				$multi_table_var = true;
+			else{
+				$chain_var .= $var;
 			}
+			
 		}
 
 		if($multi_table_var)

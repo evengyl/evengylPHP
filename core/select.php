@@ -10,9 +10,8 @@ class select extends all_query
 	{
 		if(is_object($req_sql))
 		{
-			// si l'objet table est un array on est en présence d'un left join
-			if(is_array($req_sql->table) && is_array($req_sql->var))
-				$this->construct_requete_sql = $this->select_($req_sql);	
+			if(is_array($req_sql->table))
+				$this->construct_requete_sql = $this->select_($req_sql);
 		}
 	}
 
@@ -27,13 +26,13 @@ class select extends all_query
 		$chain_limit = "";
 
 		$var_processing = new var_processing();
-		$chain_var = $var_processing->set_var_chain($req_sql->table, $req_sql->var);
+		$chain_var = $var_processing->set_var_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
 		if(isset($req_sql->var_translate))
 			$chain_var_trans = $var_processing->set_var_trans_chain($req_sql->var_translate, (!empty($chain_var)?true:false), (isset($_SESSION['lang'])?$_SESSION['lang']:""));
 		
 
 		$from_processing = new parse_table_jointure();
-		$chain_jointure = $from_processing->set_jointure_chain($req_sql->table, $req_sql->var);
+		$chain_jointure = $from_processing->set_jointure_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
 
 		$where_processing = new where();
 		$chain_where = $where_processing->where_processing($req_sql->table, (isset($req_sql->where)?$req_sql->where:""));
