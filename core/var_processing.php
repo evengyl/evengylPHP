@@ -33,6 +33,9 @@ class var_processing
 					$multi_table_var = true;
 				}
 			}
+			else{
+				$chain_var .= $var;
+			}
 			
 		}
 
