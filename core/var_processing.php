@@ -4,6 +4,7 @@ class var_processing
 	public $table = "";
 	public $table_join_on = "";
 
+
 	public function set_var_chain($table, $var = false)
 	{
 		$chain_var = "";

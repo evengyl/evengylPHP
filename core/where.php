@@ -1,56 +1,104 @@
 <?
 class where
 {
-	public function where_processing($table = array(), $where = false)
+	public $db_link = "";
+
+
+	public function __construct($db_link)
+	{
+		$this->db_link = $db_link;
+	}
+
+	public function where_processing($table = array(), $columns, $var_array = array())
 	{
 		$where_chain = " WHERE ";
-		$like = false;
+
+		if($columns == "1")
+			$where_chain .= "1";
 
 
-		if(!is_array($where))
+		else if(preg_match_all('/([a-z_]+[ ]*)([LIKE|IN|=<>!]*[ ]*)(\$[1-9]+[ ]*)(AND|OR[ ]*)*/', $columns, $matches))
 		{
-			if(!$where)
-				$where_chain .= " 1 ";
-			else
-				$where_chain .= $table[0].".".htmlentities($where);	
-		}
-		else
-		{
-			foreach($where as $key => $row_where)
+			unset($matches[0]);
+			$matches = array_values($matches);
+			
+			$i = 0;
+
+			$count_value = count($matches[0]);
+
+			while($count_value > 0)
 			{
-				if($row_where == "OR" || $row_where == "AND")
-					$where_chain .= htmlentities($row_where)." ";
+				$first_for_table = true;
+				$activate_like = false;
+				$activate_in = false;
 
-				else if($row_where == "LIKE")
+				foreach($matches as $key_matche => $matche)
 				{
-					$where_chain .= " LIKE ";
-					$like = true;
+					$str_value = trim($matches[$key_matche][$i]);
+
+					if($activate_like)
+					{
+						$where_chain .= "%".$str_value."% ";
+						$activate_like = false;
+						continue ;
+					}
+
+					if($activate_in)
+					{
+						$where_chain .= "(".$str_value.") ";
+						$activate_in = false;
+						continue ;
+					}
+
+					if($first_for_table)
+						$where_chain .= $table[0].".";
+
+					
+
+					$where_chain .= $str_value." ";
+
+
+					//part spec affectation
+					if($str_value == "LIKE")
+						$activate_like = true;
+
+					if($str_value == "IN")
+						$activate_in = true;
+
+					$first_for_table = false;
 				}
-				else if($row_where == "NOT LIKE")
+
+				$i++;
+				$count_value--;
+			}
+		}
+
+		if(is_array($var_array))
+		{
+			foreach($var_array as $key_var => $row_var)
+			{
+				$tmp_key = $key_var +1;
+
+				if(is_array($row_var))
 				{
-					$where_chain .= " NOT LIKE ";
-					$like = true;
+					foreach($row_var as $key => $row)
+					{
+						if(!is_numeric($row))
+							$row_var[$key] = mysqli_real_escape_string($this->db_link, $row);
+					}
+					$row_var = implode(",",$row_var);
 				}
-
-				else if($row_where == "IN")
-					$where_chain .= htmlentities($row_where)." ";
-
-				else if($row_where == "NOT IN")
-					$where_chain .= htmlentities($row_where)." ";
-
 				else
 				{
-					if($like)
-						$row_where = "'%".htmlentities($row_where)."%' ";
-					else if($row_where == "")
-						$row_where = $row_where;
-					else
-						$row_where = $table[0].".".htmlentities($row_where)." ";
-					
-					$where_chain .= $row_where;
+					if(!is_numeric($row_var))
+						$row_var = "'".mysqli_real_escape_string($this->db_link, $row_var)."'";
 				}
+
+				$where_chain = str_replace("$".$tmp_key, $row_var, $where_chain);
 			}
 		}
 		return $where_chain;
+		
 	}
+
 }

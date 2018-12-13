@@ -4,10 +4,25 @@ class select extends all_query
 {
 	public $construct_requete_sql = "";
 	public $is_var_translate = false;
+	public $db_link = "";
+
+	private $var_processing;
+	private $from_processing;
+	private $where_processing;
+	private $order_processing;
+	private $limit_processing;
 
 	
-	public function __construct($req_sql)
+	public function __construct($req_sql, $db_link)
 	{
+		$this->db_link = $db_link;
+
+		$this->var_processing = new var_processing();
+		$this->from_processing = new parse_table_jointure();
+		$this->where_processing = new where($this->db_link);
+		$this->order_processing = new order_processing();
+		$this->limit_processing = new limit_processing();
+
 		if(is_object($req_sql))
 		{
 			if(is_array($req_sql->table))
@@ -25,23 +40,23 @@ class select extends all_query
 		$chain_order = "";
 		$chain_limit = "";
 
-		$var_processing = new var_processing();
-		$chain_var = $var_processing->set_var_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
+		$chain_var = $this->var_processing->set_var_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
 		if(isset($req_sql->var_translate))
-			$chain_var_trans = $var_processing->set_var_trans_chain($req_sql->var_translate, (!empty($chain_var)?true:false), (isset($_SESSION['lang'])?$_SESSION['lang']:""));
+			$chain_var_trans = $this->var_processing->set_var_trans_chain(
+						$req_sql->var_translate, 
+						(!empty($chain_var)?true:false), 
+						(isset($_SESSION['lang'])?$_SESSION['lang']:"")
+					);
 		
 
-		$from_processing = new parse_table_jointure();
-		$chain_jointure = $from_processing->set_jointure_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
+		$chain_jointure = $this->from_processing->set_jointure_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
 
-		$where_processing = new where();
-		$chain_where = $where_processing->where_processing($req_sql->table, (isset($req_sql->where)?$req_sql->where:""));
 
-		$order_processing = new order_processing();
-		$chain_order = $order_processing->set_order((isset($req_sql->order))?$req_sql->order:"", $req_sql->table[0]);
+		$chain_where = $this->where_processing->where_processing($req_sql->table, (isset($req_sql->where[0])?$req_sql->where[0]:""), (isset($req_sql->where[1])?$req_sql->where[1]:""));
+		
+		$chain_order = $this->order_processing->set_order((isset($req_sql->order))?$req_sql->order:"", $req_sql->table[0]);
 
-		$limit_processing = new limit_processing();
-		$chain_limit = $limit_processing->set_limit((isset($req_sql->limit))?$req_sql->limit:"");
+		$chain_limit = $this->limit_processing->set_limit((isset($req_sql->limit))?$req_sql->limit:"");
 
 
 
