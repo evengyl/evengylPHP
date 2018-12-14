@@ -4,7 +4,7 @@
 
 class _db_connect extends Config
 {
-	private $db_link;	
+	public $db_link;	
 	private $is_connected = false;
 	private $last_res_sql = null;
 	private $last_req_sql = null;

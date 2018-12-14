@@ -8,7 +8,6 @@
 
 class all_query extends _db_connect
 {
-	public $db_link;
 	public $_app;
 
 	public function __construct(&$_app)
