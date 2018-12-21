@@ -8,8 +8,6 @@
 
 class all_query extends _db_connect
 {
-	public $db_link;
-	protected $_prefix_table;
 	public $_app;
 
 	public function __construct(&$_app)
@@ -21,15 +19,15 @@ class all_query extends _db_connect
 			parent::$base = $this->_app->base_dir;
 
 		parent::__construct();
-
-		if(Config::$prefix_sql != '')
-			$this->_prefix_table = Config::$prefix_sql;
 	}
 
 
 	public function select($req_sql, $return_sql_prepare = 0)
 	{
-		$select =  new select($req_sql);
+		if(empty($this->db_link))
+			$this->set_db_link();
+
+		$select =  new select($req_sql, $this->db_link);
 		$construct_requete_sql = $select->construct_requete_sql;
 
 		$i = 0;
@@ -53,11 +51,10 @@ class all_query extends _db_connect
 	}
 
 
-	public function insert_into($req_sql) // opérationnel et fonctionnel , reste à tester sur la validation
+	public function insert_into($req_sql, $return_sql_prepare = 0) // opérationnel et fonctionnel , reste à tester sur la validation
 	{
 		$this->set_db_link();
 
-		$req_sql->table = $this->_prefix_table.$req_sql->table;	
 
 		$columns = "";
 		$values = "";
@@ -77,19 +74,22 @@ class all_query extends _db_connect
 
 		$values = substr($values,2);
 		$req_sql = "INSERT INTO ".$req_sql->table." (".$columns.") VALUES (".$values.")";
+		
+		if($return_sql_prepare)
+			affiche_pre($req_sql);
+
 		parent::query($req_sql, $this->_app);
 		unset($req_sql);
 
 	}
 
 
-	public function update($req_sql)
+	public function update($req_sql, $return_sql_prepare = 0)
 	{
 		$set_all = "";
 
 		$this->set_db_link();
 
-		$req_sql->table = $this->_prefix_table.$req_sql->table;	
 		
 
 		foreach($req_sql->ctx as $key => $values)
@@ -112,7 +112,12 @@ class all_query extends _db_connect
 				$req_sql = 'UPDATE '.$req_sql->table.' SET '.$set_all.' WHERE '.$req_sql->where;	
 		}
 
+		if($return_sql_prepare)
+			affiche_pre($req_sql);
+
 		$requete_win_lost = parent::query_update($req_sql, $this->_app);
+		
+
 		if($requete_win_lost > 0)
 			return $erreur = 'modification bien appliquée';
 		else
@@ -127,9 +132,6 @@ class all_query extends _db_connect
 
 	public function delete_row($table, $where)
 	{
-		$req_sql->table = $this->_prefix_table.$req_sql->table;	
-		
-
 		$req_sql = "DELETE FROM ".$table." WHERE ".$where;
 		parent::query($req_sql, $this->_app);
 	}
@@ -137,9 +139,6 @@ class all_query extends _db_connect
 	public function delete($obj)
 	{
 		$construct_req = "";
-
-		$obj->table = $this->_prefix_table.$obj->table;	
-		
 
 		if(is_object($obj))
 		{
