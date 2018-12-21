@@ -10,7 +10,7 @@ Class order_processing
 			if(is_array($order))
 			{
 				foreach($order as $key => $ord)
-				$chain_order = " ORDER BY ".$table.".".$key." ".$ord;	
+					$chain_order = " ORDER BY ".$table.".".$ord;	
 			}
 			
 		}

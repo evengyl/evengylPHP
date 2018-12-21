@@ -51,7 +51,7 @@ class all_query extends _db_connect
 	}
 
 
-	public function insert_into($req_sql) // opérationnel et fonctionnel , reste à tester sur la validation
+	public function insert_into($req_sql, $return_sql_prepare = 0) // opérationnel et fonctionnel , reste à tester sur la validation
 	{
 		$this->set_db_link();
 
@@ -74,13 +74,17 @@ class all_query extends _db_connect
 
 		$values = substr($values,2);
 		$req_sql = "INSERT INTO ".$req_sql->table." (".$columns.") VALUES (".$values.")";
+		
+		if($return_sql_prepare)
+			affiche_pre($req_sql);
+
 		parent::query($req_sql, $this->_app);
 		unset($req_sql);
 
 	}
 
 
-	public function update($req_sql)
+	public function update($req_sql, $return_sql_prepare = 0)
 	{
 		$set_all = "";
 
@@ -108,7 +112,12 @@ class all_query extends _db_connect
 				$req_sql = 'UPDATE '.$req_sql->table.' SET '.$set_all.' WHERE '.$req_sql->where;	
 		}
 
+		if($return_sql_prepare)
+			affiche_pre($req_sql);
+
 		$requete_win_lost = parent::query_update($req_sql, $this->_app);
+		
+
 		if($requete_win_lost > 0)
 			return $erreur = 'modification bien appliquée';
 		else
