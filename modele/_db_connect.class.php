@@ -90,6 +90,14 @@ class _db_connect extends Config
 		return $res_sql;
 	}
 
+	public function last_insert_id()
+	 {
+	 	if($this->is_connected == false)
+			$this->connect();
+
+	 	return mysqli_insert_id($this->db_link);
+	 }
+
 	public function query_update($req_sql, &$_app) //not for return somethings
 	{
 		$i = count($this->_app->array_sql_);

@@ -13,18 +13,20 @@ class where
 	{
 		$where_chain = " WHERE ";
 
+
 		if($columns == "1")
 			$where_chain .= "1";
 
 
-		else if(preg_match_all('/([a-z_]+[ ]*)([LIKE|IN|=<>!]*[ ]*)(\$[1-9]+[ ]*)(AND|OR[ ]*)*/', $columns, $matches))
+		else if(preg_match_all('/([.a-z_]+[ ]*)([LIKE|IN|=<>!]*[ ]*)(\$[1-9]+[ ]*)(AND|OR[ ]*)*/', $columns, $matches))
 		{
 			unset($matches[0]);
 			$matches = array_values($matches);
-			
+
 			$i = 0;
 
 			$count_value = count($matches[0]);
+
 
 			while($count_value > 0)
 			{
@@ -50,13 +52,13 @@ class where
 						continue ;
 					}
 
-					if($first_for_table)
-						$where_chain .= $table[0].".";
-
-					
+					if($first_for_table){
+						//on va voir si la var que l'on désigne dans le where est déjà sous '.' 
+						if(!strpos($str_value, "."))
+							$where_chain .= $table[0].".";
+					}
 
 					$where_chain .= $str_value." ";
-
 
 					//part spec affectation
 					if($str_value == "LIKE")
