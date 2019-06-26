@@ -58,6 +58,7 @@ class where
 							$where_chain .= $table[0].".";
 					}
 
+
 					$where_chain .= $str_value." ";
 
 					//part spec affectation
@@ -75,10 +76,12 @@ class where
 			}
 		}
 
+
 		if(is_array($var_array))
 		{
 			foreach($var_array as $key_var => $row_var)
 			{
+
 				$tmp_key = $key_var +1;
 
 				if(is_array($row_var))
@@ -93,7 +96,18 @@ class where
 				else
 				{
 					if(!is_numeric($row_var))
-						$row_var = "'".mysqli_real_escape_string($this->db_link, $row_var)."'";
+						$row_var = mysqli_real_escape_string($this->db_link, $row_var);
+				}
+
+				if(is_string($row_var))
+				{
+					if(strpos($where_chain, "%")){
+						$where_chain = str_replace("%$", "'%$", $where_chain);
+						$where_chain = str_replace("$".$tmp_key."%", "$".$tmp_key."%'", $where_chain);
+					}
+					else{
+						$where_chain = str_replace("$".$tmp_key, "'$".$tmp_key."'", $where_chain);	
+					}
 				}
 
 				$where_chain = str_replace("$".$tmp_key, $row_var, $where_chain);
