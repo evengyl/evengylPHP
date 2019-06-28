@@ -42,24 +42,28 @@ class _db_connect extends Config
 	//cette fonction va permettre de remplacer dans toute les boucle de fetch, par mysqli_fetch_object
 	//elle recois la requete envoyer par l'appelant  
 	public function fetch_object($req_sql, &$_app)  // elle recois la requ�te sql sous forme de string
-	{	
+	{
 		if($this->is_connected == false) // v�rifie si la connection � la DB est �tablie si pas , elle le fait
 			$this->connect(); //appel la fonction
 
 		if(is_null($this->last_req_sql) || is_null($this->last_res_sql) || $req_sql != $this->last_req_sql)
 		{
-			$i = count($this->_app->array_sql_);
-			$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
-			$this->_app->array_sql_[$i]['sql'] = $req_sql;
+			if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"]) 
+			{
+				$i = count($this->_app->array_sql_);
+				$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
+				$this->_app->array_sql_[$i]['sql'] = $req_sql;
+			}
 
 			$this->last_req_sql = $req_sql; // enregistre une copie temporaire de la requete
 			$this->last_res_sql = mysqli_query($this->db_link, $req_sql)or die('Probleme de requete = '. $req_sql);// enregistre une copie temporaire de la reponse requete
-			if(!$this->last_res_sql && $_SERVER['HTTP_HOST'] == "localhost")
-			{
-            	affiche_pre(mysqli_error($this->db_link));
-        	}
 
-        	$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+			if(!$this->last_res_sql && $_SERVER['HTTP_HOST'] == "localhost")
+            	affiche_pre(mysqli_error($this->db_link));
+
+            if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"])
+        		$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+
 		}// si les valeurs sont null ou diff�rente , enregistre les variable correctement
 		$res = mysqli_fetch_object($this->last_res_sql);  //enregistre les lignes de la requ�te sur un object
 		if (is_null($res))
@@ -76,9 +80,14 @@ class _db_connect extends Config
 
 	public function query($req_sql, &$_app) //not for return somethings
 	{
-		$i = count($this->_app->array_sql_);
-		$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
-		$this->_app->array_sql_[$i]['sql'] = $req_sql;
+
+
+		if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"])
+		{
+			$i = count($this->_app->array_sql_);
+			$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
+			$this->_app->array_sql_[$i]['sql'] = $req_sql;
+		}
 
 		if($this->is_connected == false)
 			$this->connect();
@@ -86,7 +95,9 @@ class _db_connect extends Config
 		$res_sql = mysqli_query($this->db_link, $req_sql)or die(mysqli_error($this->db_link));
 		$nb_link_affected = $this->db_link->affected_rows;
 
-		$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+		if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"])
+			$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+
 		return $res_sql;
 	}
 
@@ -100,9 +111,12 @@ class _db_connect extends Config
 
 	public function query_update($req_sql, &$_app) //not for return somethings
 	{
-		$i = count($this->_app->array_sql_);
-		$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
-		$this->_app->array_sql_[$i]['sql'] = $req_sql;
+		if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"])
+		{
+			$i = count($this->_app->array_sql_);
+			$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
+			$this->_app->array_sql_[$i]['sql'] = $req_sql;
+		}
 
 		if($this->is_connected == false)
 			$this->connect();
@@ -110,7 +124,9 @@ class _db_connect extends Config
 		$res_sql = mysqli_query($this->db_link, $req_sql)or die(mysqli_error($this->db_link));
 		$nb_link_affected = $this->db_link->affected_rows;
 
-		$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+		if(isset($this->_app->option_app["view_time_exec_all_sql"]) && $this->_app->option_app["view_time_exec_all_sql"])
+			$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+
 		return $res_sql;
 	}
 
