@@ -52,7 +52,7 @@ class select extends all_query
 		$chain_jointure = $this->from_processing->set_jointure_chain($req_sql->table, (isset($req_sql->var)?$req_sql->var:""));
 
 
-		$chain_where = $this->where_processing->where_processing($req_sql->table, (isset($req_sql->where[0])?$req_sql->where[0]:""), (isset($req_sql->where[1])?$req_sql->where[1]:""));
+		$chain_where = $this->where_processing->where_processing($req_sql->table, (isset($req_sql->where[0])?$req_sql->where[0]:"1"), (isset($req_sql->where[1])?$req_sql->where[1]:""));
 		
 		$chain_order = $this->order_processing->set_order((isset($req_sql->order))?$req_sql->order:"", $req_sql->table[0]);
 
