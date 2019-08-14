@@ -9,7 +9,7 @@ class where
 		$this->db_link = $db_link;
 	}
 
-	public function where_processing($table = array(), $columns, $var_array = array())
+	public function where_processing($table = array(), $columns, $var_array = array(), $other_condition_last = "")
 	{
 		$where_chain = " WHERE ";
 
@@ -91,7 +91,7 @@ class where
 						if(!is_numeric($row))
 							$row_var[$key] = mysqli_real_escape_string($this->db_link, $row);
 					}
-					$row_var = implode(",",$row_var);
+					$row_var = implode("','",$row_var);
 				}
 				else
 				{
@@ -113,6 +113,10 @@ class where
 				$where_chain = str_replace("$".$tmp_key, $row_var, $where_chain);
 			}
 		}
+
+		if(!empty($other_condition_last))
+			$where_chain .= $other_condition_last; 
+
 		return $where_chain;
 		
 	}
