@@ -27,27 +27,61 @@ class all_query extends _db_connect
 		if(empty($this->db_link))
 			$this->set_db_link();
 
-		$select =  new select($req_sql, $this->db_link);
+		//phase de test ORM
+		$select = new select($req_sql, $this->db_link, $this->_app);
 		$construct_requete_sql = $select->construct_requete_sql;
 
 		$i = 0;
-
 		while($row = parent::fetch_object($construct_requete_sql, $this->_app))
 		{
 			$res_fx[$i] = $row;
 			$i++;
 		}
 
+
 		if($return_sql_prepare)
 			$res_fx[] = $construct_requete_sql;
 		else
 			unset($construct_requete_sql); //vide le buffer de memoire $req_sql pour liberer de la place 	
-		
+
+
+		//si on a du manytomany
+		if(!empty($select->array_sql_many))
+		{
+			//il faut boucles sur les many, ensuite sur les res_fx pour faire chaque requete une a une dans le foreach des res_fx et y stocker les res_fx_many, 
+			//comme on sera dans la boucle des res on peux utiliser la liaison sql
+			foreach($select->array_sql_many as $name_var_model => $row_many)
+			{
+
+				foreach($res_fx as $row_first)
+				{
+					$row_many_tmp = $row_many;
+					$row_many_tmp['where'] = (!empty($row_many_tmp['second_where'])?trim($row_many_tmp['second_where'].$row_first->id):"");
+
+					$many_select = new select((object)$row_many_tmp, $this->db_link, $this->_app);
+
+					$construct_requete_sql_to_many = $many_select->construct_requete_sql.$row_many_tmp['where'];
+
+					$i = 0;
+					while($row_many_tmp = parent::fetch_object($construct_requete_sql_to_many, $this->_app))
+					{
+						$res_fx_many[$i] = $row_many_tmp;
+						$i++;
+					}
+
+					if(isset($res_fx_many))
+					{
+						$row_first->$name_var_model = $res_fx_many;
+						unset($res_fx_many);
+					}
+				}
+			}
+		}
+
 		if(!isset($res_fx))
 			return '';
 		else 
 			return $res_fx;
-			
 	}
 
 
@@ -202,128 +236,6 @@ class all_query extends _db_connect
     {
         parent::query($query, $this->_app);
     }
-
-
-	public function generate_form_unpdate($table_needed, $id)
-	{
-		if(Config::$prefix_sql != '')
-		{
-			if(strpos($table_needed, Config::$prefix_sql) === false)
-				$table_needed = Config::$prefix_sql.$table_needed;
-		}
-			
-
-		$req_simply = new stdClass();
-		$req_simply->table = $table_needed;
-		$req_simply->var = "*";
-		$req_simply->where = "id = '". $id ."'";
-		$req_simply = $this->select($req_simply);
-		
-		ob_start();?>
-		    <div class='contenu_compte'>
-		        <div class="row">
-		            <div class="col-lg-12">
-		                <form class="form-inline" style="margin:auto;" role="form" action="" method="POST">
-		                    <br><?php
-		                    foreach($req_simply[0] as $key => $value)
-		                    {?>
-		                            <div class="form-group <?
-			                            if($key == 'id')
-			                                echo  'has-error';
-			                            else
-		    	                            echo 'has-success';
-	        	                    	?>" style="margin-right:30px;">
-
-		                                <div class="input-group">
-		                                    <div style="width: 200px;" class="input-group-addon"><?php echo $key ?></div>
-		                                    <input style='width:450px;' type="text" <?php echo ($key == 'id')? 'disabled id="disabledInput"':'id="inputSuccess1"'; ?>
-	                                            id="disabledInput" value="<?= $value ?>"
-		                                        class="form-control" name="<?php echo $key ?>">
-
-		                                </div>
-
-		                            </div>
-		                            <br><?
-		                    }?>
-		                    <input type="hidden" name="id" value="<?= $id ?>">
-		                    <button style="width: 650px; margin-top:15px;" type="submit" class="btn btn-default">Submit</button>
-		                </form>
-		            </div>
-		        </div>
-		    </div><?
-	    $content = ob_get_clean();
-	    return $content;
-	}
-
-
-	public function generate_form_insert_into($table_needed, $option = array("TYPE" => null, "CHAMPS" => array()))
-	{
-		if(Config::$prefix_sql != '')
-		{
-			if(strpos($table_needed, Config::$prefix_sql) === false)
-				$table_needed = Config::$prefix_sql.$table_needed;	
-		}
-		
-
-		$req_simply = new stdClass();
-		$req_simply->table = $table_needed;
-		$req_simply->var = "*";
-		$req_simply = $this->select($req_simply);?>
-		
-	    <div class='contenu_compte'>
-	        <div class="row">
-	            <div class="col-lg-12">
-	                <form class="" style="margin:auto;" role="form" action="" method="POST">
-	                    <br><?php
-	                    foreach($req_simply[0] as $key => $value)
-	                    {
-                    		if(in_array($key, $option['CHAMPS']) && $option['TYPE'] != null)
-							{
-								if($option['TYPE'] == "select")
-								{
-									$for_select = new stdClass();
-									$for_select->table = Config::$prefix_sql.$table_needed;
-									$for_select->var = "marque";
-									$for_select->distinct = true;
-									$for_select = $this->select($for_select);?>
-									
-									<div class="input-group">
-										<div style="width: 200px;" class="input-group-addon"><?php echo $key ?></div>
-										<select name="<?= $key; ?>" style="width:450px;" class="form-control "><?
-											foreach($for_select as $row_select)
-											{?>
-												<option value="<?= $row_select->{$option['CHAMPS'][array_search($key, $option['CHAMPS'])]} ?>"><?= $row_select->{$option['CHAMPS'][array_search($key, $option['CHAMPS'])]} ?></option><?
-											}?>
-										</select>
-									</div><br><?
-								}
-							}
-							else
-							{?>
-								<div class="form-group <?
-		                            if($key == 'id')
-		                                echo  'has-error';
-		                            else
-	    	                            echo 'has-success';
-        	                    	?>" style="margin-right:30px;">
-
-	                                <div class="input-group">
-	                                    <div style="width: 200px;" class="input-group-addon"><?php echo $key ?></div>
-	                                    <input style='width:450px;' type="text"
-	                                        <?php echo ($key == 'id')? 'disabled id="disabledInput"':'id="inputSuccess1"'; ?>
-	                                        <?php echo ($key == 'id_category')? 'disabled id="disabledInput" placeholder="'.$value_2.'"':'id="inputSuccess1"'; ?>
-	                                           class="form-control" name="<?php echo $key ?>">
-
-	                                </div>
-	                            </div><?
-							}
-	                    }?>
-	                    <button style="width: 650px; margin-top:15px;" type="submit" class="btn btn-default">Submit</button>
-	                </form>
-	            </div>
-	        </div>
-	    </div><?
-	}
 }
 
 ?>

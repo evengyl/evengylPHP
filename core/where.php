@@ -17,7 +17,6 @@ class where
 		if($columns == "1")
 			$where_chain .= "1";
 
-
 		else if(preg_match_all('/([.a-z_]+[ ]*)([LIKE|IN|=<>!]*[ ]*)(\$[1-9]+[ ]*)(AND|OR[ ]*)*/', $columns, $matches))
 		{
 			unset($matches[0]);
@@ -55,7 +54,7 @@ class where
 					if($first_for_table){
 						//on va voir si la var que l'on désigne dans le where est déjà sous '.' 
 						if(!strpos($str_value, "."))
-							$where_chain .= $table[0].".";
+							$where_chain .= $table.".";
 					}
 
 
