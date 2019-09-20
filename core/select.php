@@ -34,17 +34,17 @@ class select extends all_query
 
 
 
-
 		//function principale du programme select
 		$this->create_object($this->req->table);
 		//va filtrer les var demandée dans le stack pour ne pas rendre les requete trop gourmande
 		if($this->req->data != "*")
 			$this->render_opti_stack_data();
 
-
 		$this->construct_requete_sql = $this->construct_sql($this->stack_data[$this->primary_table]);
 
 		$this->construct_requete_sql .= $this->chain_where;
+		$this->construct_requete_sql .= " ".$chain_order;
+		$this->construct_requete_sql .= " ".$chain_limit;
 		return $this->construct_requete_sql;
 			
 	}

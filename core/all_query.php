@@ -57,7 +57,6 @@ class all_query extends _db_connect
 				{
 					$row_many_tmp = $row_many;
 					$row_many_tmp['where'] = (!empty($row_many_tmp['second_where'])?trim($row_many_tmp['second_where'].$row_first->id):"");
-
 					$many_select = new select((object)$row_many_tmp, $this->db_link, $this->_app);
 
 					$construct_requete_sql_to_many = $many_select->construct_requete_sql.$row_many_tmp['where'];
@@ -115,7 +114,7 @@ class all_query extends _db_connect
 		parent::query($req_sql, $this->_app);
 
 		if($return_insert_id)
-			return parent::last_insert_id();
+			return parent::get_last_insert_id();
 
 		unset($req_sql);
 
@@ -151,7 +150,7 @@ class all_query extends _db_connect
 		}
 
 		if($view_sql_prepare)
-			affiche_pre($req_sql);
+			var_dump($req_sql);
 
 		$requete_win_lost = parent::query_update($req_sql, $this->_app);
 		
