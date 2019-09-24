@@ -51,27 +51,29 @@ class all_query extends _db_connect
 			//il faut boucles sur les many, ensuite sur les res_fx pour faire chaque requete une a une dans le foreach des res_fx et y stocker les res_fx_many, 
 			//comme on sera dans la boucle des res on peux utiliser la liaison sql
 			foreach($select->array_sql_many as $name_var_model => $row_many)
-			{
-
-				foreach($res_fx as $row_first)
+			{	
+				if(!empty($res_fx))
 				{
-					$row_many_tmp = $row_many;
-					$row_many_tmp['where'] = (!empty($row_many_tmp['second_where'])?trim($row_many_tmp['second_where'].$row_first->id):"");
-					$many_select = new select((object)$row_many_tmp, $this->db_link, $this->_app);
-
-					$construct_requete_sql_to_many = $many_select->construct_requete_sql.$row_many_tmp['where'];
-
-					$i = 0;
-					while($row_many_tmp = parent::fetch_object($construct_requete_sql_to_many, $this->_app))
+					foreach($res_fx as $row_first)
 					{
-						$res_fx_many[$i] = $row_many_tmp;
-						$i++;
-					}
+						$row_many_tmp = $row_many;
+						$row_many_tmp['where'] = (!empty($row_many_tmp['second_where'])?trim($row_many_tmp['second_where'].$row_first->id):"");
+						$many_select = new select((object)$row_many_tmp, $this->db_link, $this->_app);
 
-					if(isset($res_fx_many))
-					{
-						$row_first->$name_var_model = $res_fx_many;
-						unset($res_fx_many);
+						$construct_requete_sql_to_many = $many_select->construct_requete_sql.$row_many_tmp['where'];
+
+						$i = 0;
+						while($row_many_tmp = parent::fetch_object($construct_requete_sql_to_many, $this->_app))
+						{
+							$res_fx_many[$i] = $row_many_tmp;
+							$i++;
+						}
+
+						if(isset($res_fx_many))
+						{
+							$row_first->$name_var_model = $res_fx_many;
+							unset($res_fx_many);
+						}
 					}
 				}
 			}

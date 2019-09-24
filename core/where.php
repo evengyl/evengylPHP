@@ -37,12 +37,15 @@ class where
 				{
 					$str_value = trim($matches[$key_matche][$i]);
 
+
+
 					if($activate_like)
 					{
 						$where_chain .= "%".$str_value."% ";
 						$activate_like = false;
 						continue ;
 					}
+
 
 					if($activate_in)
 					{
@@ -51,12 +54,14 @@ class where
 						continue ;
 					}
 
-					if($first_for_table){
+
+
+					if($first_for_table)
+					{
 						//on va voir si la var que l'on désigne dans le where est déjà sous '.' 
 						if(!strpos($str_value, "."))
 							$where_chain .= $table.".";
 					}
-
 
 					$where_chain .= $str_value." ";
 
@@ -80,37 +85,35 @@ class where
 		{
 			foreach($var_array as $key_var => $row_var)
 			{
-
 				$tmp_key = $key_var +1;
-
 				if(is_array($row_var))
 				{
+
 					foreach($row_var as $key => $row)
 					{
 						if(!is_numeric($row))
 							$row_var[$key] = mysqli_real_escape_string($this->db_link, $row);
 					}
 					$row_var = implode("','",$row_var);
+					$row_var = "'".$row_var."'";
+				}
+				else if(is_string($row_var))
+				{
+					$where_chain = str_replace("$".$tmp_key, "'$".$tmp_key."'", $where_chain);	
+
+					//affiche($where_chain);
 				}
 				else
-				{
-					if(!is_numeric($row_var))
-						$row_var = mysqli_real_escape_string($this->db_link, $row_var);
-				}
-
-				if(is_string($row_var))
-				{
-					if(strpos($where_chain, "%")){
-						$where_chain = str_replace("%$", "'%$", $where_chain);
-						$where_chain = str_replace("$".$tmp_key."%", "$".$tmp_key."%'", $where_chain);
-					}
-					else{
-						$where_chain = str_replace("$".$tmp_key, "'$".$tmp_key."'", $where_chain);	
-					}
-				}
+					$row_var = mysqli_real_escape_string($this->db_link, $row_var);
 
 				$where_chain = str_replace("$".$tmp_key, $row_var, $where_chain);
 			}
+			//if like
+			$where_chain = str_replace("%'", "A%", $where_chain);
+			$where_chain = str_replace("'%", "B%", $where_chain);
+
+			$where_chain = str_replace("A%", "'%", $where_chain);
+			$where_chain = str_replace("B%", "%'", $where_chain);
 		}
 
 		if(!empty($other_condition_last))
