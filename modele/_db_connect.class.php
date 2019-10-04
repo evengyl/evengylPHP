@@ -40,16 +40,24 @@ class _db_connect extends Config
 			$this->connect(); //appel la fonction
 		if(is_null($this->last_req_sql) || is_null($this->last_res_sql) || $req_sql != $this->last_req_sql)
 		{
-			$i = count($this->_app->array_sql_);
-			$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
-			$this->_app->array_sql_[$i]['sql'] = $req_sql;
+			if(isset($this->_app->option_app['view_time_exec_page']) && $this->_app->option_app['view_time_exec_page'] == 1)
+			{
+				$i = count($this->_app->array_sql_);
+				$this->_app->array_sql_[$i]['start'] = $_app->microtime_float();
+				$this->_app->array_sql_[$i]['sql'] = $req_sql;
+			}
+			
 			$this->last_req_sql = $req_sql; // enregistre une copie temporaire de la requete
 			$this->last_res_sql = mysqli_query($this->db_link, $req_sql)or die('Probleme de requete = '. $req_sql);// enregistre une copie temporaire de la reponse requete
 			if(!$this->last_res_sql && $_SERVER['HTTP_HOST'] == "localhost")
 			{
             	affiche_pre(mysqli_error($this->db_link));
         	}
-        	$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+
+        	if(isset($this->_app->option_app['view_time_exec_page']) && $this->_app->option_app['view_time_exec_page'] == 1)
+			{
+        		$this->_app->array_sql_[$i]['stop'] = $_app->microtime_float();
+        	}
 		}// si les valeurs sont null ou diff�rente , enregistre les variable correctement
 		$res = mysqli_fetch_object($this->last_res_sql);  //enregistre les lignes de la requ�te sur un object
 		if (is_null($res))
